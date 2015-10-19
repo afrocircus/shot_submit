@@ -13,9 +13,13 @@ import maya.cmds as cmds
 cmds.file(target_file, open = True, force = True)
 cameraShapes = cmds.ls(type='camera')
 cameraTransforms = cmds.listRelatives(cameraShapes, parent=1)
-renderLayers = cmds.ls(type='renderLayer')
+renderLayers = []
 
-cameraStr = '#cameras:%s' % (','.join(cameraTransforms))
-rndrLayerStr = 'render layers:%s' % (','.join(renderLayers))
+for layer in cmds.ls(type='renderLayer'):
+    if cmds.getAttr('%s.renderable' % layer):
+        renderLayers.append(layer)
 
-sys.stdout.write('%s|%s' % (cameraStr, rndrLayerStr))
+cameraStr = '#cameras|%s' % (','.join(cameraTransforms))
+rndrLayerStr = 'render layers|%s' % (','.join(renderLayers))
+
+sys.stdout.write('%s;%s' % (cameraStr, rndrLayerStr))

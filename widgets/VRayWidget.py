@@ -86,8 +86,8 @@ class VRayWidget(QtGui.QWidget):
 
     def populateWidget(self, exportSettings):
         valuedict = xmlUtils.readXMLfile(exportSettings)
-        if valuedict.has_key('scene'):
-            self.sceneEdit.setText(valuedict['scene'])
+        #if valuedict.has_key('scene'):
+        #    self.sceneEdit.setText(valuedict['scene'])
         if valuedict.has_key('filename'):
             filename = valuedict['filename'].replace('&lt;', '<')
             filename = filename.replace('&gt;','>')
@@ -151,17 +151,18 @@ class VRayWidget(QtGui.QWidget):
         cmd = '"%s" %s %s' % (mayapyLocation, mayaCameraScript, sceneFile)
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         outputStr = process.stdout.read()
+        print outputStr
         self.populateCameraAndRl(outputStr)
 
     def populateCameraAndRl(self, outputStr):
         output = outputStr.split('#')[-1]
         cameraList = []
         renderList = []
-        for outstr in output.split('|'):
+        for outstr in output.split(';'):
             if 'cameras' in outstr:
-                cameraList = outstr.split(':')[-1].split(',')
+                cameraList = outstr.split('|')[-1].split(',')
             else:
-                renderList = outstr.split(':')[-1].split(',')
+                renderList = outstr.split('|')[-1].split(',')
         self.cameraList.clear()
         self.rlList.clear()
         self.cameraList.addItems(cameraList)
@@ -198,20 +199,23 @@ class VRayWidget(QtGui.QWidget):
             renderDict['Renderer'] = 'V-Ray Standalone 2016/Default version'
         rndrValuesDict = {}
         rndrValuesDict['frames'] = str(self.frameEdit.text())
-        rndrValuesDict['outfile'] = str(self.outFileEdit.text())
+        #rndrValuesDict['outfile'] = str(self.outFileEdit.text())
         camList = [str(item.text()) for item in self.cameraList.selectedItems()]
         rlList = [str(item.text()) for item in self.rlList.selectedItems()]
         scene = str(self.exportEdit.text())
         outdir = str(self.outDirEdit.text()) + '/'
+        outfile = str(self.outFileEdit.text())
         rndrSettingsList = []
         for cam in camList:
             newscene = scene.replace('<Camera>', cam)
             newoutdir = outdir.replace('<Camera>', cam)
+            newoutfile = outfile.replace('<Camera>', cam)
             for rl in rlList:
                 if rl == 'defaultRenderLayer':
                     rl = 'masterLayer'
                 rndrValuesDict['scene'] = newscene.replace('<Layer>', rl)
                 rndrValuesDict['outdir'] = newoutdir.replace('<Layer>', rl)
+                rndrValuesDict['outfile'] = newoutfile.replace('<Layer>', rl)
                 renderDict['Values'] = rndrValuesDict
                 rndrSettings = os.path.join(rsetdir, 'v-ray_renderer_%s_%s.rset' % (cam, rl))
                 # Hack. Since outfile and outdir are not being read from the V-Ray renderer rset file.
