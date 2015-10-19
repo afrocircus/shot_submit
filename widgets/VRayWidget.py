@@ -151,7 +151,6 @@ class VRayWidget(QtGui.QWidget):
         cmd = '"%s" %s %s' % (mayapyLocation, mayaCameraScript, sceneFile)
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         outputStr = process.stdout.read()
-        print outputStr
         self.populateCameraAndRl(outputStr)
 
     def populateCameraAndRl(self, outputStr):

@@ -19,6 +19,13 @@ for layer in cmds.ls(type='renderLayer'):
     if cmds.getAttr('%s.renderable' % layer):
         renderLayers.append(layer)
 
+cmds.setAttr("vraySettings.misc_eachFrameInFile", 0)
+cmds.setAttr("vraySettings.vrscene_render_on", 0)
+cmds.setAttr("vraySettings.vrscene_on", 1)
+cmds.file(save=True, open=False)
+
+maya.standalone.uninitialize()
+
 cameraStr = '#cameras|%s' % (','.join(cameraTransforms))
 rndrLayerStr = 'render layers|%s' % (','.join(renderLayers))
 
